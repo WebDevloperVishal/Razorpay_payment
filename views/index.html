@@ -1,53 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rozorpay Payment Gateway</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Razorpay Payment Demo</title>
 </head>
 <body>
-    <h1>Pay with Rozorpay</h1>
-    Amount <input type="number" id="pay-amount">
-    <button id="rzy-button">Pay</button>
+  <h1>Pay with Razorpay</h1>
+  Amount <input type="number" id="pay-amount">
+  <button id="rzp-button">Pay</button>
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
-        document.querySelector("#rzy-button").onclick = async function(){
-            var amount = document.querySelector('#pay-amount').value;
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    document.querySelector("#rzp-button").onclick = async function() {
+      var amount = document.querySelector("#pay-amount").value;
+console.log(amount)
+      const order = await fetch("/create-order", {
+        method: "POST",
+        headers: { "Content-Type":"application/json"},
+        body: JSON.stringify({ amount: amount })
+      }).then(res => res.json());
 
-            const order = await fetch ("/create-order", {
-                method:"POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({amount: amount})
-            }).then(res => res.json());
+      var options = {
+        key:"<%= key %>",
+        amount: order.amount,
+        currency: order.currency,
+        name: "Demo Store",
+        description:"Test Transaction",
+        order_id: order.id,
+        handler: async function (response) {
+          console.log(response)
+          const verify = await fetch("/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type":"application/json"},
+            body: JSON.stringify(response)
+          });
 
-            var options = {
-                key: "<%= key %>",
-                amount: order.amount,
-                currency: order.currency,
-                name: "Aryan-Store",
-                description: "Welcome to Aryan Store",
-                order_id : order.id,
-                header: async function (response) {
-                    console.log(response);
-                    const verify = await fetch('/verify-payment', {
-                        method: "POST",
-                        header: {"Content-Type":"application/json"},
-                        body: JSON.stringify({response})
-                    });
+          if(verify.ok){
+            const paymentId = response.razorpay_payment_id;
+            window.location.href = `/payment-success?paymentId=${paymentId}`
+          }else{
+            alert("Payment Verification Failed");
+          }
+        },
+        theme: { color:"#3399cc" }
+      }
 
-                    if(verify.ok){
-                        window.location.href = "/payment-success"
-                    }else{
-                        alert('Payment Verification failed');
-                    }
-                    them: { color:"#3399cc"}
-                }
-            }
-
-            const rzpl = new Rozorpay(options)
-            rzpl.open();
-        }
-    </script>
+      const rzp1 = new Razorpay(options);
+      rzp1.open();
+    }
+  </script>
 </body>
 </html>
