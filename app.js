@@ -11,6 +11,10 @@ app.get('/', (req, res) => {
     res.render('index', { key: process.env.RAZORPAY_KEY_ID})
 })
 
+// Creta Order Route
+app.post("/create-order", async(req,res) => {
+    
+})
 
 const PORT = process.env.PORT || 3000;
 app.listen(port, () => {
