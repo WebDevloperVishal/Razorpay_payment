@@ -20,6 +20,33 @@
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({amount: amount})
             }).then(res => res.json());
+
+            var options = {
+                key: "<%= key %>",
+                amount: order.amount,
+                currency: order.currency,
+                name: "Aryan-Store",
+                description: "Welcome to Aryan Store",
+                order_id : order.id,
+                header: async function (response) {
+                    console.log(response);
+                    const verify = await fetch('/verify-payment', {
+                        method: "POST",
+                        header: {"Content-Type":"application/json"},
+                        body: JSON.stringify({response})
+                    });
+
+                    if(verify.ok){
+                        window.location.href = "/payment-success"
+                    }else{
+                        alert('Payment Verification failed');
+                    }
+                    them: { color:"#3399cc"}
+                }
+            }
+
+            const rzpl = new Rozorpay(options)
+            rzpl.open();
         }
     </script>
 </body>
